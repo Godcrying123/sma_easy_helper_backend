@@ -1,0 +1,75 @@
+[{
+        "ClusterID": 1,
+        "Name": "cluster-01",
+        "NumOfMachines": 3,
+        "ClusterLabel": "develop",
+        "Machines": [{
+                "MachineID": 1,
+                "HostName": "test-cluster-01",
+                "HostIp": "192.0.0.1",
+                "UserName": "Jackson",
+                "AuthType": "password",
+                "PassWord": "123456",
+                "AuthKey": "/test/script.crt",
+                "Label": "master"
+            },
+            {
+                "MachineID": 2,
+                "HostName": "test-cluster-02",
+                "HostIp": "192.0.0.1",
+                "UserName": "Jackson",
+                "AuthType": "password",
+                "PassWord": "123456",
+                "AuthKey": "/test/script.crt",
+                "Label": "worker"
+            },
+            {
+                "MachineID": 3,
+                "HostName": "test-cluster-03",
+                "HostIp": "192.0.0.1",
+                "UserName": "Jackson",
+                "AuthType": "password",
+                "PassWord": "123456",
+                "AuthKey": "/test/script.crt",
+                "Label": "NFS-server"
+            }
+        ]
+    },
+    {
+        "ClusterID": 2,
+        "Name": "cluster-02",
+        "NumOfMachines": 3,
+        "ClusterLabel": "QA",
+        "Machines": [{
+                "MachineID": 4,
+                "HostName": "test-cluster-01",
+                "HostIp": "192.0.0.1",
+                "UserName": "Jackson",
+                "AuthType": "password",
+                "PassWord": "123456",
+                "AuthKey": "/test/script.crt",
+                "Label": "master"
+            },
+            {
+                "MachineID": 5,
+                "HostName": "test-cluster-02",
+                "HostIp": "192.0.0.1",
+                "UserName": "Jackson",
+                "AuthType": "password",
+                "PassWord": "123456",
+                "AuthKey": "/test/script.crt",
+                "Label": "worker"
+            },
+            {
+                "MachineID": 6,
+                "HostName": "test-cluster-03",
+                "HostIp": "192.0.0.1",
+                "UserName": "Jackson",
+                "AuthType": "password",
+                "PassWord": "123456",
+                "AuthKey": "/test/script.crt",
+                "Label": "NFS-server"
+            }
+        ]
+    }
+]
