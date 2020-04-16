@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"webconsole_sma/models"
 
 	"github.com/astaxie/beego"
 	"github.com/mitchellh/go-homedir"
@@ -34,84 +35,83 @@ type Machine struct {
 	AuthKey   string
 }
 
-// wsBufferWriter is with attribute of byte buffer and mutext locker
+var (
+	SSHClients    = make(map[*websocket.Conn]bool)
+	CommandOutput = make(chan string)
+	CommandInput  = make(chan string)
+	SSHHosts      = make(map[string]models.MachineSSH)
+)
+
+// copy data from WebSocket to ssh server
+// and copy data from ssh server to WebSocket
+
+// write data to WebSocket
+// the data comes from ssh server.
 type wsBufferWriter struct {
 	buffer bytes.Buffer
-	mux    sync.Mutex
+	mu     sync.Mutex
 }
 
-type SSHConn struct {
-	StdinPipe io.WriteCloser
-	// Write() be called to receive data from ssh server
-	ComboOutput *wsBufferWriter
-	Session     *ssh.Session
+func init() {
+
 }
 
-type WsMsg struct {
-	Type string `json:"type"`
-	Cmd  string `json:"cmd"`
-	Cols int    `json:"cols"`
-	Rows int    `json:"rows"`
+// implement Write interface to write bytes from ssh server into bytes.Buffer.
+func (w *wsBufferWriter) Write(p []byte) (int, error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.buffer.Write(p)
 }
-
-var (
-	SSHMachines map[string]Machine
-	MachineID   *int
-)
 
 const (
 	wsMsgCmd    = "cmd"
 	wsMsgResize = "resize"
 )
 
-func init() {
-
+type wsMsg struct {
+	Type string `json:"type"`
+	Cmd  string `json:"cmd"`
+	Cols int    `json:"cols"`
+	Rows int    `json:"rows"`
 }
 
-func NewSSHClient(machine Machine) (*ssh.Client, error) {
+// connect to ssh server using ssh session.
+type SshConn struct {
+	// calling Write() to write data into ssh server
+	StdinPipe io.WriteCloser
+	// Write() be called to receive data from ssh server
+	ComboOutput *wsBufferWriter
+	Session     *ssh.Session
+}
+
+func NewSshClient(machine Machine) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
 		Timeout:         time.Second * 5,
 		User:            machine.UserName,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		//HostKeyCallback: hostKeyCallBackFunc(h.Host),
 	}
 	if machine.AuthType == "password" {
 		config.Auth = []ssh.AuthMethod{ssh.Password(machine.PassWord)}
 	} else {
-		config.Auth = []ssh.AuthMethod{publicKeyAuthFunc(machine.PassWord)}
+		config.Auth = []ssh.AuthMethod{publicKeyAuthFunc(machine.AuthKey)}
 	}
-	address := fmt.Sprintf("%s:%s", machine.HostIP, "22")
-	conn, err := ssh.Dial("tcp", address, config)
+	addr := fmt.Sprintf("%s:%s", machine.HostIP, "22")
+	c, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
 		return nil, err
 	}
-	return conn, nil
+	return c, nil
 }
 
-func publicKeyAuthFunc(kPath string) ssh.AuthMethod {
-	keyPath, err := homedir.Expand(kPath)
-	if err != nil {
-		log.Fatal("find key's home dir failed", err)
-	}
-	key, err := ioutil.ReadFile(keyPath)
-	if err != nil {
-		log.Fatal("ssh key file read failed", err)
-	}
-	// Create the Signer for this private key.
-	signer, err := ssh.ParsePrivateKey(key)
-	if err != nil {
-		log.Fatal("ssh key signer failed", err)
-	}
-	return ssh.PublicKeys(signer)
-}
-
-func hostKeycallBackFunc(host string) ssh.HostKeyCallback {
+func hostKeyCallBackFunc(host string) ssh.HostKeyCallback {
 	hostPath, err := homedir.Expand("~/.ssh/known_hosts")
 	if err != nil {
-		logrus.WithError(err).Error("find known_hosts's home dir failed")
+		log.Fatal("find known_hosts's home dir failed", err)
 	}
 	file, err := os.Open(hostPath)
 	if err != nil {
-		logrus.WithError(err).Error("can't find known_host file")
+		log.Fatal("can't find known_host file:", err)
 	}
 	defer file.Close()
 
@@ -137,31 +137,21 @@ func hostKeycallBackFunc(host string) ssh.HostKeyCallback {
 	return ssh.FixedHostKey(hostKey)
 }
 
-// implement Write interface to write bytes from ssh server into bytes.Buffer.
-func (w *wsBufferWriter) Write(p []byte) (int, error) {
-	w.mux.Lock()
-	defer w.mux.Unlock()
-	return w.buffer.Write(p)
-}
-
-func runCommand(client *ssh.Client, command string) (stdout string, err error) {
-	session, err := client.NewSession()
+func publicKeyAuthFunc(kPath string) ssh.AuthMethod {
+	keyPath, err := homedir.Expand(kPath)
 	if err != nil {
-		//log.Print(err)
-		return
+		log.Fatal("find key's home dir failed", err)
 	}
-	defer session.Close()
-
-	var buf bytes.Buffer
-	session.Stdout = &buf
-	err = session.Run(command)
+	key, err := ioutil.ReadFile(keyPath)
 	if err != nil {
-		//log.Print(err)
-		return
+		log.Fatal("ssh key file read failed", err)
 	}
-	stdout = string(buf.Bytes())
-
-	return
+	// Create the Signer for this private key.
+	signer, err := ssh.ParsePrivateKey(key)
+	if err != nil {
+		log.Fatal("ssh key signer failed", err)
+	}
+	return ssh.PublicKeys(signer)
 }
 
 //flushComboOutput flush ssh.session combine output into websocket response
@@ -179,14 +169,16 @@ func flushComboOutput(w *wsBufferWriter, wsConn *websocket.Conn) error {
 // setup ssh shell session
 // set Session and StdinPipe here,
 // and the Session.Stdout and Session.Sdterr are also set.
-// NewSSHConn function is for building the SSH Connection based on SSH Client
-func NewSSHConn(cols, rows int, sshClient *ssh.Client) (*SSHConn, error) {
+func NewSshConn(cols, rows int, sshClient *ssh.Client) (*SshConn, error) {
 	sshSession, err := sshClient.NewSession()
 	if err != nil {
 		return nil, err
 	}
 
-	StdinPipe, err := sshSession.StdinPipe()
+	// we set stdin, then we can write data to ssh server via this stdin.
+	// but, as for reading data from ssh server, we can set Session.Stdout and Session.Stderr
+	// to receive data from ssh server, and write back to somewhere.
+	stdinP, err := sshSession.StdinPipe()
 	if err != nil {
 		return nil, err
 	}
@@ -197,23 +189,30 @@ func NewSSHConn(cols, rows int, sshClient *ssh.Client) (*SSHConn, error) {
 	sshSession.Stderr = comboWriter
 
 	modes := ssh.TerminalModes{
-		ssh.ECHO:          1,     //disable echo
-		ssh.TTY_OP_ISPEED: 14400, //input speed = 14.4Kbaud
-		ssh.TTY_OP_OSPEED: 14400, //output speed = 14.4Kbaud
+		ssh.ECHO:          1,     // disable echo
+		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 	}
 	// Request pseudo terminal
 	if err := sshSession.RequestPty("xterm", rows, cols, modes); err != nil {
 		return nil, err
 	}
-	// Start remote Shell
+	// Start remote shell
 	if err := sshSession.Shell(); err != nil {
 		return nil, err
 	}
-	return &SSHConn{StdinPipe: StdinPipe, ComboOutput: comboWriter, Session: sshSession}, nil
+	return &SshConn{StdinPipe: stdinP, ComboOutput: comboWriter, Session: sshSession}, nil
+}
+
+func (s *SshConn) Close() {
+	if s.Session != nil {
+		s.Session.Close()
+	}
+
 }
 
 //ReceiveWsMsg  receive websocket msg do some handling then write into ssh.session.stdin
-func (ssConn *SSHConn) ReceiveWsMsg(wsConn *websocket.Conn, exitCh chan bool) {
+func (ssConn *SshConn) ReceiveWsMsg(wsConn *websocket.Conn, exitCh chan bool) {
 	//tells other go routine quit
 	defer setQuit(exitCh)
 	for {
@@ -228,7 +227,7 @@ func (ssConn *SSHConn) ReceiveWsMsg(wsConn *websocket.Conn, exitCh chan bool) {
 				return
 			}
 			//unmashal bytes into struct
-			msgObj := WsMsg{}
+			msgObj := wsMsg{}
 			if err := json.Unmarshal(wsData, &msgObj); err != nil {
 				beego.Error(err)
 				logrus.WithError(err).WithField("wsData", string(wsData)).Error("unmarshal websocket message failed")
@@ -259,7 +258,7 @@ func (ssConn *SSHConn) ReceiveWsMsg(wsConn *websocket.Conn, exitCh chan bool) {
 	}
 }
 
-func (ssConn *SSHConn) SendComboOutput(wsConn *websocket.Conn, exitCh chan bool) {
+func (ssConn *SshConn) SendComboOutput(wsConn *websocket.Conn, exitCh chan bool) {
 	//tells other go routine quit
 	defer setQuit(exitCh)
 
@@ -281,8 +280,8 @@ func (ssConn *SSHConn) SendComboOutput(wsConn *websocket.Conn, exitCh chan bool)
 	}
 }
 
-func (sshConn *SSHConn) SessionWait(quitChan chan bool) {
-	if err := sshConn.Session.Wait(); err != nil {
+func (ssConn *SshConn) SessionWait(quitChan chan bool) {
+	if err := ssConn.Session.Wait(); err != nil {
 		logrus.WithError(err).Error("ssh session wait failed")
 		setQuit(quitChan)
 	}
@@ -290,10 +289,4 @@ func (sshConn *SSHConn) SessionWait(quitChan chan bool) {
 
 func setQuit(ch chan bool) {
 	ch <- true
-}
-
-func (s *SSHConn) close() {
-	if s.Session != nil {
-		s.Session.Close()
-	}
 }

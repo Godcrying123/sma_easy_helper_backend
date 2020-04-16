@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"webconsole_sma/utils"
 
 	"sma_easy_helper/models"
 
@@ -35,13 +34,13 @@ func (this *SSHWebSocketController) Get() {
 		PassWord:  "iso*help",
 		AuthKey:   "/test.crt",
 	}
-	sshClient, err := models.NewSSHClient(sshHost)
+	sshClient, err := models.NewSshClient(sshHost)
 	if err != nil {
 		beego.Error(err)
 	}
 	defer sshClient.Close()
 	// startTime := time.Now()
-	sshConn, err := utils.NewSshConn(120, 32, sshClient)
+	sshConn, err := models.NewSshConn(120, 32, sshClient)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -51,7 +50,7 @@ func (this *SSHWebSocketController) Get() {
 		beego.Error(err)
 	}
 	defer ws.Close()
-	utils.SSHClients[ws] = true
+	// utils.SSHClients[ws] = true
 	quitChan := make(chan bool, 3)
 	go sshConn.ReceiveWsMsg(ws, quitChan)
 	go sshConn.SendComboOutput(ws, quitChan)
