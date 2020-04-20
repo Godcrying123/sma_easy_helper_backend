@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/pkg/sftp"
@@ -44,6 +45,7 @@ var (
 	childrenDirs  []Directory
 	file          File
 	directory     Directory
+	fileBuilder   strings.Builder
 )
 
 // FileRead function is for reading the file in localhost
@@ -63,9 +65,23 @@ func FileRead(filePath string) (fileContent string, err error) {
 	return string(fileByte), nil
 }
 
-// // // SFTPFileRead function is for reading the file in the remote host
-// func SFTPFileRead(filePath string, sftpConn *sftp.Client) (file File, err error) {
-// }
+// SFTPFileRead function is for reading the file in the remote host
+func SFTPFileRead(readFile File, sftpConn *sftp.Client) (file File, err error) {
+	file = readFile
+	sftpFile, err := sftpConn.Open(readFile.FilePath + readFile.FileName)
+	if err != nil {
+		beego.Error(err)
+		return file, nil
+	}
+	defer sftpFile.Close()
+	sftpFileByte, err := ioutil.ReadAll(sftpFile)
+	if err != nil {
+		beego.Error(err)
+		return file, err
+	}
+	file.FileContent = string(sftpFileByte)
+	return file, nil
+}
 
 // SFTPFileDirList function is for listing all files and directory in the remote host
 func SFTPFileDirList(Path string, sftpConn *sftp.Client) (DirectoryList, error) {
@@ -100,7 +116,13 @@ func SFTPFileDirList(Path string, sftpConn *sftp.Client) (DirectoryList, error) 
 			fileChan <- file
 		}
 	}
-
+	for aFile := range fileChan {
+		childrenFiles = append(childrenFiles, aFile)
+	}
+	for bFile := range dirChan {
+		childrenDirs = append(childrenDirs, bFile)
+	}
+	directoryList = DirectoryList{ChildrenDirs: childrenDirs, ChildrenFiles: childrenFiles}
 	return directoryList, nil
 }
 
@@ -125,20 +147,43 @@ func dirents(dir string) []os.FileInfo {
 	return entries
 }
 
-// // SFTPFileListDir function is for listing all file in a specific dirpath from a remote host
-// func SFTPFileListDir(DirPath string, sftpConn *sftp.Client) (File []File, wrongRead string, err error) {
+// FileWrite function is for writing the file in localhost
+func FileWrite(file File) (err error) {
+	readFile, err := os.Open(file.FilePath + file.FileName)
+	defer readFile.Close()
+	if err != nil {
+		beego.Error(err)
+		return err
+	} else if os.IsNotExist(err) {
+		beego.Info("This File Not Existed")
+		return err
+	} else {
+		if _, err := readFile.Write([]byte(file.FileContent)); err != nil {
+			beego.Error(err)
+			return err
+		}
+		return nil
+	}
+}
 
-// }
-
-// // FileWrite function is for writing the file in localhost
-// func FileWrite(filePath string, file File) (err error) {
-
-// }
-
-// // SFTPFileWrite function is for writing the file in the remote host
-// func SFTPFileWrite(filePathn string, file File, sftpConn *sftp.Client) (err error) {
-
-// }
+// SFTPFileWrite function is for writing the file in the remote host
+func SFTPFileWrite(file File, sftpConn *sftp.Client) (err error) {
+	sftpFileWriter, err := sftpConn.OpenFile(file.FilePath+file.FileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE)
+	defer sftpFileWriter.Close()
+	if err != nil {
+		beego.Error(err)
+		return err
+	} else if os.IsNotExist(err) {
+		beego.Info("This File Not Existed")
+		return err
+	} else {
+		if _, err := sftpFileWriter.Write([]byte(file.FileContent)); err != nil {
+			beego.Error(err)
+			return err
+		}
+		return nil
+	}
+}
 
 // // FileCompare function is for comparing two different files and output difference
 // func FileCompare(OldFile File, NewFile File) (diff string, err error) {
