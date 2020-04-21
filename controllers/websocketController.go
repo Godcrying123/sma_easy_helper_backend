@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"golang.org/x/crypto/ssh"
 	"net/http"
 
 	"sma_easy_helper/models"
@@ -8,6 +9,8 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/gorilla/websocket"
 )
+
+var sshConn *ssh.Client
 
 // WebSocketController is the controller for handing remote SSH connection
 type SSHWebSocketController struct {
@@ -28,10 +31,10 @@ func (this *SSHWebSocketController) Get() {
 		MachineID: 1,
 		Label:     "Master",
 		HostName:  "test-machine-01",
-		HostIP:    "16.186.79.151",
+		HostIP:    "47.103.211.132",
 		UserName:  "root",
 		AuthType:  "password",
-		PassWord:  "iso*help",
+		PassWord:  "211032@#ZKztx",
 		AuthKey:   "/test.crt",
 	}
 	sshClient, err := models.NewSshClient(sshHost)

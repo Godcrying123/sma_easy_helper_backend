@@ -25,6 +25,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["sma_easy_helper/controllers:FileController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:FileController"],
+        beego.ControllerComments{
+            Method: "Get",
+            Router: `/`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["sma_easy_helper/controllers:OperationController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:OperationController"],
         beego.ControllerComments{
             Method: "GetAll",
