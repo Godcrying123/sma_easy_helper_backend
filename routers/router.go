@@ -30,11 +30,11 @@ func init() {
 				&controllers.FileController{},
 			),
 		),
-		beego.NSNamespace("/logs",
-			beego.NSInclude(
-				&controllers.FileController{},
-			),
-		),
+		//beego.NSNamespace("/logs",
+		//	beego.NSInclude(
+		//		&controllers.FileController{},
+		//	),
+		//),
 	)
 	beego.AddNamespace(ns)
 	// Register this router for the SSH connection

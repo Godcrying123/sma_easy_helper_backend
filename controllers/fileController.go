@@ -7,25 +7,37 @@ import (
 	"sma_easy_helper/models"
 )
 
-var sftpConn  *sftp.Client
+var sftpConn *sftp.Client
 
 // FileController is the controller for handling the file requests
 type FileController struct {
 	BaseController
 }
 
+//SFTPConnGet function is for getting the sftp entity for every file request
+func SFTPConnGet(){
+	beego.Info(sshClient.Conn.RemoteAddr())
+	sftpConn, err := sftp.NewClient(sshClient)
+	if err != nil {
+		beego.Error(err)
+	}
+	beego.Info(sftpConn)
+	beego.Info(sshClient.Conn.RemoteAddr())
+}
+
 // @Title ListAll
 // @Description get all Files in this Directory Path
 // @Success 200 {object} models.DirectoryList
-// @router / [get]
+// @router /list [get]
 // List function is for getting the file content from the known host
 func (c *FileController) List() {
+	SFTPConnGet()
 	dirPath := c.Input().Get("dir")
 	if dirPath != "" {
 		dirList, err := models.SFTPFileDirList(dirPath, sftpConn)
 		if err != nil {
 			beego.Error(err)
-			c.Data["json"] = err
+			c.Data["json"] = err.Error()
 			c.ServeJSON()
 		} else {
 			c.Data["json"] = dirList
@@ -37,7 +49,7 @@ func (c *FileController) List() {
 // @Title Read
 // @Description get the File all attribute for
 // @Success 200 {object} models.File
-// @router /read/ [get]
+// @router /read [get]
 //Read function is for handling file content read
 func (c *FileController) Read() {
 	filePath := c.Input().Get("path")
@@ -55,9 +67,22 @@ func (c *FileController) Read() {
 	}
 }
 
+// @Title save
+// @Description write the file with assigned content
+// @Success 200 {object} models.File
+// @router /write [post]
 // Save function is for saving the file content edited by customer in UI
 func (c *FileController) Save() {
-
+	filePath := c.Input().Get("path")
+	var writeFile models.File
+	writeFile.FileName = filePath
+	writeFile.FilePath = filePath
+	err := models.SFTPFileWrite(writeFile, sftpConn)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = err.Error()
+		c.ServeJSON()
+	}
 }
 
 // Compare function is for comparing the origin and new files content

@@ -16,18 +16,14 @@ import (
 // File struct is for handling the file attribute
 type File struct {
 	FileName         string
-	FileAccess       os.FileMode
 	FileContent      string
 	FilePath         string
-	FileSize         int64
 	FileLastModified time.Time
 }
 
 // Directory struct is for handing the  Directory attribute
 type Directory struct {
 	DirName         string
-	DirAccess       os.FileMode
-	DirSize         int64
 	DirPath         string
 	DirLastModified time.Time
 }
@@ -86,6 +82,7 @@ func SFTPFileRead(readFile File, sftpConn *sftp.Client) (file File, err error) {
 // SFTPFileDirList function is for listing all files and directory in the remote host
 func SFTPFileDirList(Path string, sftpConn *sftp.Client) (DirectoryList, error) {
 
+	beego.Info(sftpConn)
 	directoryList := DirectoryList{ChildrenDirs: nil, ChildrenFiles: nil}
 	_, err := sftpConn.Stat(Path)
 	if err != nil {
@@ -104,14 +101,10 @@ func SFTPFileDirList(Path string, sftpConn *sftp.Client) (DirectoryList, error) 
 			directory.DirName = subFile.Name()
 			directory.DirLastModified = subFile.ModTime()
 			directory.DirPath = Path
-			directory.DirSize = subFile.Size()
-			directory.DirAccess = subFile.Mode()
 			dirChan <- directory
 		} else {
 			file.FileName = subFile.Name()
 			file.FileLastModified = subFile.ModTime()
-			file.FileSize = subFile.Size()
-			file.FileAccess = subFile.Mode()
 			file.FilePath = Path
 			fileChan <- file
 		}

@@ -27,9 +27,27 @@ func init() {
 
     beego.GlobalControllerRouter["sma_easy_helper/controllers:FileController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:FileController"],
         beego.ControllerComments{
-            Method: "Get",
-            Router: `/`,
+            Method: "List",
+            Router: `/list`,
             AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["sma_easy_helper/controllers:FileController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:FileController"],
+        beego.ControllerComments{
+            Method: "Read",
+            Router: `/read`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["sma_easy_helper/controllers:FileController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:FileController"],
+        beego.ControllerComments{
+            Method: "Save",
+            Router: `/write`,
+            AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

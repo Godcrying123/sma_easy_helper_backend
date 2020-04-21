@@ -10,7 +10,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var sshConn *ssh.Client
+var (
+	sshClient *ssh.Client
+	err error
+)
 
 // WebSocketController is the controller for handing remote SSH connection
 type SSHWebSocketController struct {
@@ -37,7 +40,7 @@ func (this *SSHWebSocketController) Get() {
 		PassWord:  "211032@#ZKztx",
 		AuthKey:   "/test.crt",
 	}
-	sshClient, err := models.NewSshClient(sshHost)
+	sshClient, err = models.NewSshClient(sshHost)
 	if err != nil {
 		beego.Error(err)
 	}
