@@ -28,16 +28,23 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+//SSHClientGet function is for handling the SSH client entity get
+func SSHClientGet(sshHost models.Machine) (*ssh.Client, error) {
+	return nil, nil
+}
+
 // Get function is for connecting the remote SSH machine
 func (this *SSHWebSocketController) Get() {
 	sshHost := models.Machine{
 		MachineID: 1,
 		Label:     "Master",
 		HostName:  "test-machine-01",
-		HostIP:    "47.103.211.132",
+		//HostIP:    "47.103.211.132",
+		HostIP:    "16.186.79.169",
 		UserName:  "root",
 		AuthType:  "password",
-		PassWord:  "211032@#ZKztx",
+		PassWord:  "iso*help",
+		//PassWord:  "211032@#ZKztx",
 		AuthKey:   "/test.crt",
 	}
 	sshClient, err = models.NewSshClient(sshHost)

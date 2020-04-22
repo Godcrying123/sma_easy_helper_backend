@@ -18,17 +18,22 @@ func init() {
 		beego.NSNamespace("/clusters",
 			beego.NSInclude(
 				&controllers.ClusterController{},
-			),
+				),
 		),
 		beego.NSNamespace("/operations",
 			beego.NSInclude(
 				&controllers.OperationController{},
-			),
+				),
 		),
 		beego.NSNamespace("/files",
 			beego.NSInclude(
 				&controllers.FileController{},
-			),
+				),
+		),
+		beego.NSNamespace("/init",
+			beego.NSInclude(
+				&controllers.BaseController{},
+				),
 		),
 		//beego.NSNamespace("/logs",
 		//	beego.NSInclude(

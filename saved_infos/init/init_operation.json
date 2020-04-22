@@ -1,0 +1,48 @@
+[{
+  "OperationID": 1,
+  "OperationDescription": "the operation for installing the nginx and the start the nginx server",
+  "NumOfSteps": 3,
+  "DetailedSteps": [{
+    "SubOperationID": 1,
+    "SubOperationDescription": "please install nginx package in the VM",
+    "Machine": "master",
+    "StepType": "SSH",
+    "Commands": "",
+    "File": "",
+    "FileChange": "",
+    "URL": "",
+    "Image": "",
+    "Notifications": "please check the firewalld service status",
+    "CheckMethod": "rpm -qa|nginx",
+    "CheckResults": true
+  },
+    {
+      "SubOperationID": 2,
+      "SubOperationDescription": "Configure the nginx.conf file",
+      "Machine": "master",
+      "StepType": "File",
+      "Commands": "",
+      "File": "/etc/nginx/nginx.conf",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "please make sure the file has been saved",
+      "CheckMethod": "",
+      "CheckResults": true
+    },
+    {
+      "SubOperationID": 3,
+      "SubOperation_Description": "Open the http://localhost:8080/ page to review the page",
+      "Machine": "master",
+      "StepType": "URL",
+      "Commands": "",
+      "File": "",
+      "FileChange": "",
+      "URL": "http://localhost:8080",
+      "Image": "",
+      "Notifications": "make sure the locahost and related port has not been occupied",
+      "CheckMethod": "",
+      "CheckResults": true
+    }
+  ]
+}]

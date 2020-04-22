@@ -141,8 +141,8 @@ func dirents(dir string) []os.FileInfo {
 }
 
 // FileWrite function is for writing the file in localhost
-func FileWrite(file File) (err error) {
-	readFile, err := os.Open(file.FilePath + file.FileName)
+func FileWrite(filePath string, content string) (err error) {
+	readFile, err := os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 766)
 	defer readFile.Close()
 	if err != nil {
 		beego.Error(err)
@@ -151,7 +151,7 @@ func FileWrite(file File) (err error) {
 		beego.Info("This File Not Existed")
 		return err
 	} else {
-		if _, err := readFile.Write([]byte(file.FileContent)); err != nil {
+		if _, err := readFile.Write([]byte(content)); err != nil {
 			beego.Error(err)
 			return err
 		}

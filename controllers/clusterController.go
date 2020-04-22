@@ -25,7 +25,7 @@ func (c *ClusterController) GetAll() {
 // @Description get cluster by name
 // @Param	cname		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.User
-// @Failure 403 :cname is empty
+// @Failure 404 :cname is empty
 // @router /:cname [get]
 func (c *ClusterController) Get() {
 	cname := c.GetString(":cname")

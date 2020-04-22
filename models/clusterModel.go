@@ -38,11 +38,11 @@ func init() {
 		close(ClusterFilesChan)
 	}()
 	for FileName := range ClusterFilesChan {
-		fileStrig, err := FileRead(FileName)
+		fileString, err := FileRead(FileName)
 		if err != nil {
 			beego.Error(err)
 		} else {
-			WholeClusterFileString += fileStrig
+			WholeClusterFileString += fileString
 		}
 	}
 	go func() {

@@ -52,10 +52,6 @@ type wsBufferWriter struct {
 	mu     sync.Mutex
 }
 
-func init() {
-
-}
-
 // implement Write interface to write bytes from ssh server into bytes.Buffer.
 func (w *wsBufferWriter) Write(p []byte) (int, error) {
 	w.mu.Lock()
@@ -289,4 +285,8 @@ func (ssConn *SshConn) SessionWait(quitChan chan bool) {
 
 func setQuit(ch chan bool) {
 	ch <- true
+}
+
+func ListMachine() []Machine {
+	return nil
 }

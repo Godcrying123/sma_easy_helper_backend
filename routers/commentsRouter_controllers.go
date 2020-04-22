@@ -7,6 +7,42 @@ import (
 
 func init() {
 
+    beego.GlobalControllerRouter["sma_easy_helper/controllers:BaseController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:BaseController"],
+        beego.ControllerComments{
+            Method: "InfoClusterRead",
+            Router: `/cluster/read`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["sma_easy_helper/controllers:BaseController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:BaseController"],
+        beego.ControllerComments{
+            Method: "InfoClusterWrite",
+            Router: `/cluster/write`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["sma_easy_helper/controllers:BaseController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:BaseController"],
+        beego.ControllerComments{
+            Method: "InfoOperationRead",
+            Router: `/operation/read`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["sma_easy_helper/controllers:BaseController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:BaseController"],
+        beego.ControllerComments{
+            Method: "InfoOperationWrite",
+            Router: `/operation/write`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["sma_easy_helper/controllers:ClusterController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:ClusterController"],
         beego.ControllerComments{
             Method: "GetAll",
