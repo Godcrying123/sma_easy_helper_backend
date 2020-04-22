@@ -34,7 +34,7 @@ func SSHClientGet(sshHost models.Machine) (*ssh.Client, error) {
 }
 
 // Get function is for connecting the remote SSH machine
-func (this *SSHWebSocketController) Get() {
+func (c *SSHWebSocketController) Get() {
 	sshHost := models.Machine{
 		MachineID: 1,
 		Label:     "Master",
@@ -47,6 +47,8 @@ func (this *SSHWebSocketController) Get() {
 		//PassWord:  "211032@#ZKztx",
 		AuthKey:   "/test.crt",
 	}
+	machineKey := c.Input().Get("machine")
+	sshHost = MachineMap[machineKey]
 	sshClient, err = models.NewSshClient(sshHost)
 	if err != nil {
 		beego.Error(err)
@@ -58,7 +60,7 @@ func (this *SSHWebSocketController) Get() {
 		beego.Error(err)
 	}
 	defer sshConn.Close()
-	ws, err := upgrader.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil)
+	ws, err := upgrader.Upgrade(c.Ctx.ResponseWriter, c.Ctx.Request, nil)
 	if err != nil {
 		beego.Error(err)
 	}

@@ -7,22 +7,29 @@ import (
 	"sma_easy_helper/models"
 )
 
-var sftpConn *sftp.Client
+var (
+	sftpConn *sftp.Client
+)
 
 // FileController is the controller for handling the file requests
 type FileController struct {
 	BaseController
 }
 
-//SFTPConnGet function is for getting the sftp entity for every file request
-func SFTPConnGet(){
-	beego.Info(sshClient.Conn.RemoteAddr())
-	sftpConn, err := sftp.NewClient(sshClient)
+func SFTPConnGet(c *FileController) (sftpConn *sftp.Client, err error) {
+	machineKey := c.Input().Get("machine")
+	sshHost := MachineMap[machineKey]
+	sshConn, err := models.NewSshClient(sshHost)
 	if err != nil {
 		beego.Error(err)
+		return nil, err
 	}
-	beego.Info(sftpConn)
-	beego.Info(sshClient.Conn.RemoteAddr())
+	sftpConn, err = sftp.NewClient(sshConn)
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+	return sftpConn, nil
 }
 
 // @Title ListAll
@@ -31,7 +38,8 @@ func SFTPConnGet(){
 // @router /list [get]
 // List function is for getting the file content from the known host
 func (c *FileController) List() {
-	SFTPConnGet()
+
+	sftpConn, _ = SFTPConnGet(c)
 	dirPath := c.Input().Get("dir")
 	if dirPath != "" {
 		dirList, err := models.SFTPFileDirList(dirPath, sftpConn)
@@ -52,6 +60,8 @@ func (c *FileController) List() {
 // @router /read [get]
 //Read function is for handling file content read
 func (c *FileController) Read() {
+
+	sftpConn, _ = SFTPConnGet(c)
 	filePath := c.Input().Get("path")
 	var readFile models.File
 	readFile.FileName = filePath
@@ -73,6 +83,8 @@ func (c *FileController) Read() {
 // @router /write [post]
 // Save function is for saving the file content edited by customer in UI
 func (c *FileController) Save() {
+
+	sftpConn, _ = SFTPConnGet(c)
 	filePath := c.Input().Get("path")
 	var writeFile models.File
 	writeFile.FileName = filePath
