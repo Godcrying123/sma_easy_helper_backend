@@ -1,10 +1,8 @@
 package controllers
 
 import (
-	"sma_easy_helper/models"
-	"strconv"
-
 	_ "github.com/astaxie/beego"
+	"sma_easy_helper/models"
 )
 
 // OperationController is the controller for handling the operation requests
@@ -31,8 +29,8 @@ func (o *OperationController) GetAll() {
 func (o *OperationController) Get() {
 	oname := o.GetString(":oname")
 	if oname != "" {
-		intOname, err := strconv.Atoi(oname)
-		operation, err := models.GetOperatoin(intOname)
+		//intOname, err := strconv.Atoi(oname)
+		operation, err := models.GetOperatoin(oname)
 		if err != nil {
 			o.Data["json"] = err.Error()
 		} else {

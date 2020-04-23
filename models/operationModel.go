@@ -11,6 +11,7 @@ import (
 // Operation struct is for structuring the operation model with below attribute
 type Operation struct {
 	OperationID          int
+	OperationShortName   string
 	OperationDescription string
 	NumOfSteps           int
 	DetailedSteps        []SubOperation
@@ -34,7 +35,7 @@ type SubOperation struct {
 
 // this is the data structure used in Operation
 var (
-	OperationMap      map[int]Operation
+	OperationMap      map[string]Operation
 	OperationList     []Operation
 	OperationID       *int
 	OperationFileChan chan string
@@ -42,7 +43,7 @@ var (
 )
 
 func init() {
-	OperationMap = make(map[int]Operation)
+	OperationMap = make(map[string]Operation)
 	OperationList = make([]Operation, 0)
 	OperationFileChan = make(chan string)
 	OperationChan = make(chan Operation)
@@ -63,7 +64,7 @@ func init() {
 			close(OperationChan)
 		}()
 		for operationEntity := range OperationChan {
-			OperationMap[operationEntity.OperationID] = operationEntity
+			OperationMap[operationEntity.OperationShortName] = operationEntity
 			OperationList = append(OperationList, operationEntity)
 		}
 	}
@@ -86,7 +87,7 @@ func OperationJSONRead(fileByte []byte, OperationChan chan<- Operation) (chan<- 
 }
 
 // GetOperatoin function is for listing the operation entity by its ID
-func GetOperatoin(oname int) (o Operation, err error) {
+func GetOperatoin(oname string) (o Operation, err error) {
 	if o, ok := OperationMap[oname]; ok {
 		return o, nil
 	}
@@ -99,7 +100,7 @@ func GetAllOperations() []Operation {
 }
 
 // DeleteOperation function is for deleting the operation entity by its ID
-func DeleteOperation(oname int) {
+func DeleteOperation(oname string) {
 	delete(OperationMap, oname)
 }
 
@@ -107,6 +108,6 @@ func DeleteOperation(oname int) {
 func AddOperation(o Operation) int {
 	o.OperationID = *OperationID
 	*OperationID++
-	OperationMap[o.OperationID] = o
+	OperationMap[o.OperationShortName] = o
 	return o.OperationID
 }

@@ -1,6 +1,7 @@
 [{
   "OperationID": 1,
   "OperationDescription": "the operation for installing the nginx and the start the nginx server",
+  "OperationShortName": "nginx",
   "NumOfSteps": 3,
   "DetailedSteps": [{
     "SubOperationID": 1,
