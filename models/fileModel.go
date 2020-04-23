@@ -82,13 +82,21 @@ func SFTPFileRead(readFile File, sftpConn *sftp.Client) (file File, err error) {
 // SFTPFileDirList function is for listing all files and directory in the remote host
 func SFTPFileDirList(Path string, sftpConn *sftp.Client) (DirectoryList, error) {
 
-	beego.Info(sftpConn)
 	directoryList := DirectoryList{ChildrenDirs: nil, ChildrenFiles: nil}
-	_, err := sftpConn.Stat(Path)
+	var filePath *string
+	beego.Info(Path)
+	beego.Info(sftpConn)
+	fileInfo, err := sftpConn.Stat(Path)
+	beego.Info(Path)
 	if err != nil {
-		beego.Error()
+		beego.Error(err)
+	} else if (fileInfo.IsDir()) {
+		filePath = &Path
+	} else {
+		beego.Info(Path)
+
 	}
-	walkFiles, err := sftpConn.ReadDir(Path)
+	walkFiles, err := sftpConn.ReadDir(*filePath)
 	if err != nil {
 		beego.Error(err)
 		return directoryList, err

@@ -33,7 +33,7 @@
         },
         {
             "SubOperationID": 3,
-            "SubOperation_Description": "Open the http://localhost:8080/ page to review the page",
+            "SubOperationDescription": "Open the http://localhost:8080/ page to review the page",
             "Machine": "master",
             "StepType": "URL",
             "Commands": "",

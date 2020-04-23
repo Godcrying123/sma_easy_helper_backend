@@ -1,38 +1,37 @@
 [{
   "ClusterID": 1,
-  "Name": "cluster-03",
+  "Name": "cluster-01",
   "NumOfMachines": 3,
   "ClusterLabel": "develop",
-  "Machines": [
-    {
-      "MachineID": 1,
-      "Label": "master",
-      "HostName": "test-cluster-01",
-      "HostIP": "192.0.0.1",
-      "UserName": "Jackson",
-      "AuthType": "password",
-      "PassWord": "123456",
-      "AuthKey": "/test/script.crt"
-    },
+  "Machines": [{
+    "MachineID": 1,
+    "HostName": "test-cluster-01",
+    "HostIp": "16.186.79.97",
+    "UserName": "root",
+    "AuthType": "password",
+    "PassWord": "iso*help",
+    "AuthKey": "/test/script.crt",
+    "Label": "master"
+  },
     {
       "MachineID": 2,
-      "Label": "worker",
       "HostName": "test-cluster-02",
-      "HostIP": "192.0.0.1",
-      "UserName": "Jackson",
+      "HostIp": "16.186.79.97",
+      "UserName": "root",
       "AuthType": "password",
-      "PassWord": "123456",
-      "AuthKey": "/test/script.crt"
+      "PassWord": "iso*help",
+      "AuthKey": "/test/script.crt",
+      "Label": "worker"
     },
     {
       "MachineID": 3,
-      "Label": "NFS-server",
       "HostName": "test-cluster-03",
-      "HostIP": "192.0.0.1",
-      "UserName": "Jackson",
+      "HostIp": "16.186.79.97",
+      "UserName": "root",
       "AuthType": "password",
-      "PassWord": "123456",
-      "AuthKey": "/test/script.crt"
+      "PassWord": "iso*help",
+      "AuthKey": "/test/script.crt",
+      "Label": "master1"
     }
   ]
 }]

@@ -17,9 +17,8 @@ type FileController struct {
 }
 
 func SFTPConnGet(c *FileController) (sftpConn *sftp.Client, err error) {
-	machineKey := c.Input().Get("machine")
-	sshHost := MachineMap[machineKey]
-	sshConn, err := models.NewSshClient(sshHost)
+
+	sshConn, err := models.NewSshClient(SSHHost)
 	if err != nil {
 		beego.Error(err)
 		return nil, err

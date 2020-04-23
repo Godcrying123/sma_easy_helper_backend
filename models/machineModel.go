@@ -13,7 +13,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"webconsole_sma/models"
 
 	"github.com/astaxie/beego"
 	"github.com/mitchellh/go-homedir"
@@ -39,7 +38,6 @@ var (
 	SSHClients    = make(map[*websocket.Conn]bool)
 	CommandOutput = make(chan string)
 	CommandInput  = make(chan string)
-	SSHHosts      = make(map[string]models.MachineSSH)
 )
 
 // copy data from WebSocket to ssh server

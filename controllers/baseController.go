@@ -15,6 +15,7 @@ type BaseController struct {
 }
 
 var MachineMap map[string]models.Machine
+var SSHHost models.Machine
 
 // CookiesCheck Check the Cookies is still valid
 func (this *BaseController) CookiesCheck() {
@@ -108,7 +109,6 @@ func (c *BaseController) InfoClusterWrite(){
 		beego.Error(err)
 	}
 	dataString := "[" + string(data) + "]"
-	beego.Info(dataString)
 	err = models.FileWrite("./saved_infos/init/init_cluster.json", dataString)
 	if err != nil {
 		beego.Error(err)
@@ -131,11 +131,24 @@ func (c *BaseController) InfoOperationWrite() {
 		beego.Error(err)
 	}
 	dataString := "[" + string(data) + "]"
-	beego.Info(dataString)
 	err = models.FileWrite("./saved_infos/init/init_operation.json", dataString)
 	if err != nil {
 		beego.Error(err)
 	}
 	c.Data["json"] = operationEntity
+	c.ServeJSON()
+}
+
+// @Title SSHInit
+// @Description Init the SSH Connection
+// @Success 200 {object} models.Machine
+// @Failure 404 :error
+// @router /ssh [post]
+//SSHInit function is for reading the machine entity and build the SSHConn
+func (c *BaseController) SSHInit() {
+
+	machineSelect := string(c.Ctx.Input.RequestBody)
+	SSHHost = MachineMap[machineSelect]
+	c.Data["json"] = SSHHost
 	c.ServeJSON()
 }

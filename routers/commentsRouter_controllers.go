@@ -43,6 +43,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["sma_easy_helper/controllers:BaseController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:BaseController"],
+        beego.ControllerComments{
+            Method: "SSHInit",
+            Router: `/ssh`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["sma_easy_helper/controllers:ClusterController"] = append(beego.GlobalControllerRouter["sma_easy_helper/controllers:ClusterController"],
         beego.ControllerComments{
             Method: "GetAll",
