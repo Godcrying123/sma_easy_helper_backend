@@ -33,6 +33,7 @@ func init() {
 	ClusterFilesChan = make(chan string)
 	ClusterChan = make(chan Cluster)
 	var WholeClusterFileString string
+	WholeClusterFileString = "["
 	go func() {
 		FileListDir("./saved_infos/cluster/", ClusterFilesChan)
 		close(ClusterFilesChan)
@@ -42,9 +43,10 @@ func init() {
 		if err != nil {
 			beego.Error(err)
 		} else {
-			WholeClusterFileString += fileString
+			WholeClusterFileString += fileString[1: len(fileString)-1] + ","
 		}
 	}
+	WholeClusterFileString = WholeClusterFileString[0:len(WholeClusterFileString)-1]+ "]"
 	go func() {
 		ClusterJSONRead([]byte(WholeClusterFileString), ClusterChan)
 		close(ClusterChan)

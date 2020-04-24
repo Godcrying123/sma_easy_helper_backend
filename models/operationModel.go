@@ -48,6 +48,7 @@ func init() {
 	OperationFileChan = make(chan string)
 	OperationChan = make(chan Operation)
 	var WholeOperationFileString string
+	WholeOperationFileString = "["
 	go func() {
 		FileListDir("./saved_infos/operation/", OperationFileChan)
 		close(OperationFileChan)
@@ -57,18 +58,18 @@ func init() {
 		if err != nil {
 			beego.Error(err)
 		} else {
-			WholeOperationFileString += fileString
-		}
-		go func() {
-			OperationJSONRead([]byte(WholeOperationFileString), OperationChan)
-			close(OperationChan)
-		}()
-		for operationEntity := range OperationChan {
-			OperationMap[operationEntity.OperationShortName] = operationEntity
-			OperationList = append(OperationList, operationEntity)
+			WholeOperationFileString += fileString[1: len(fileString)-1] + ","
 		}
 	}
-
+	WholeOperationFileString = WholeOperationFileString[0:len(WholeOperationFileString)-1] + "]"
+	go func() {
+		OperationJSONRead([]byte(WholeOperationFileString), OperationChan)
+		close(OperationChan)
+	}()
+	for operationEntity := range OperationChan {
+		OperationMap[operationEntity.OperationShortName] = operationEntity
+		OperationList = append(OperationList, operationEntity)
+	}
 }
 
 // OperationJSONRead is function is for transfering JSON file to structure
