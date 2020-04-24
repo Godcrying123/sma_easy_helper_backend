@@ -2,13 +2,12 @@ package models
 
 import (
 	"fmt"
+	"github.com/pkg/sftp"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
-
-	"github.com/pkg/sftp"
+	"sync"
 
 	"github.com/astaxie/beego"
 )
@@ -18,20 +17,26 @@ type File struct {
 	FileName         string
 	FileContent      string
 	FilePath         string
-	FileLastModified time.Time
+	FileLastModified string
 }
 
 // Directory struct is for handing the  Directory attribute
 type Directory struct {
 	DirName         string
 	DirPath         string
-	DirLastModified time.Time
+	DirLastModified string
 }
 
 // DirectoryList struct is for handing the Directory and its SubName attribute
 type DirectoryList struct {
 	ChildrenDirs  []Directory
 	ChildrenFiles []File
+}
+
+type IndexValue struct {
+	mux sync.Mutex
+	wg sync.WaitGroup
+	childrenDirTmp Directory
 }
 
 var (
@@ -43,6 +48,12 @@ var (
 	directory     Directory
 	fileBuilder   strings.Builder
 )
+
+//init function to init the file read channel
+func init(){
+	fileChan = make(chan File)
+	dirChan = make(chan Directory)
+}
 
 // FileRead function is for reading the file in localhost
 func FileRead(filePath string) (fileContent string, err error) {
@@ -64,7 +75,7 @@ func FileRead(filePath string) (fileContent string, err error) {
 // SFTPFileRead function is for reading the file in the remote host
 func SFTPFileRead(readFile File, sftpConn *sftp.Client) (file File, err error) {
 	file = readFile
-	sftpFile, err := sftpConn.Open(readFile.FilePath + readFile.FileName)
+	sftpFile, err := sftpConn.Open(readFile.FilePath + "/" +readFile.FileName)
 	if err != nil {
 		beego.Error(err)
 		return file, nil
@@ -84,17 +95,16 @@ func SFTPFileDirList(Path string, sftpConn *sftp.Client) (DirectoryList, error) 
 
 	directoryList := DirectoryList{ChildrenDirs: nil, ChildrenFiles: nil}
 	var filePath *string
-	beego.Info(Path)
-	beego.Info(sftpConn)
 	fileInfo, err := sftpConn.Stat(Path)
-	beego.Info(Path)
 	if err != nil {
 		beego.Error(err)
-	} else if (fileInfo.IsDir()) {
+	} else if fileInfo.IsDir() {
 		filePath = &Path
 	} else {
-		beego.Info(Path)
-
+		dirSlice := strings.Split(Path, "/")
+		dirSlice = dirSlice[:len(dirSlice) - 1]
+		Path = strings.Join(dirSlice, "/")
+		filePath = &Path
 	}
 	walkFiles, err := sftpConn.ReadDir(*filePath)
 	if err != nil {
@@ -107,22 +117,22 @@ func SFTPFileDirList(Path string, sftpConn *sftp.Client) (DirectoryList, error) 
 		}
 		if subFile.IsDir() {
 			directory.DirName = subFile.Name()
-			directory.DirLastModified = subFile.ModTime()
-			directory.DirPath = Path
-			dirChan <- directory
+			directory.DirLastModified = subFile.ModTime().Format("2006/Jan/02 15:04")
+			directory.DirPath = *filePath
+			childrenDirs = append(childrenDirs, directory)
 		} else {
 			file.FileName = subFile.Name()
-			file.FileLastModified = subFile.ModTime()
-			file.FilePath = Path
-			fileChan <- file
+			file.FileLastModified = subFile.ModTime().Format("2006/Jan/02 15:04")
+			file.FilePath = *filePath
+			childrenFiles = append(childrenFiles, file)
 		}
 	}
-	for aFile := range fileChan {
-		childrenFiles = append(childrenFiles, aFile)
-	}
-	for bFile := range dirChan {
-		childrenDirs = append(childrenDirs, bFile)
-	}
+	//for aFile := range fileChan {
+	//	childrenFiles = append(childrenFiles, aFile)
+	//}
+	//for bFile := range dirChan {
+	//	childrenDirs = append(childrenDirs, bFile)
+	//}
 	directoryList = DirectoryList{ChildrenDirs: childrenDirs, ChildrenFiles: childrenFiles}
 	return directoryList, nil
 }

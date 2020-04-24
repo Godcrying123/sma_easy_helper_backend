@@ -23,7 +23,7 @@
       "Machine": "master",
       "StepType": "File",
       "Commands": "",
-      "File": "/etc/yum.conf",
+      "File": "/usr/lib/systemd/system/dmraid-activation.service",
       "FileChange": "",
       "URL": "",
       "Image": "",

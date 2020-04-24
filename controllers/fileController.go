@@ -5,6 +5,7 @@ import (
 	_ "github.com/astaxie/beego"
 	"github.com/pkg/sftp"
 	"sma_easy_helper/models"
+	"strings"
 )
 
 var (
@@ -42,12 +43,15 @@ func (c *FileController) List() {
 	dirPath := c.Input().Get("dir")
 	if dirPath != "" {
 		dirList, err := models.SFTPFileDirList(dirPath, sftpConn)
+		if len(dirList.ChildrenFiles) > 20 {
+			dirList.ChildrenFiles = dirList.ChildrenFiles[:5]
+		}
 		if err != nil {
 			beego.Error(err)
 			c.Data["json"] = err.Error()
 			c.ServeJSON()
 		} else {
-			c.Data["json"] = dirList
+			c.Data["json"] = dirList.ChildrenFiles
 			c.ServeJSON()
 		}
 	}
@@ -62,9 +66,12 @@ func (c *FileController) Read() {
 
 	sftpConn, _ = SFTPConnGet(c)
 	filePath := c.Input().Get("path")
+	dirSclice := strings.Split(filePath, "/")
+
 	var readFile models.File
-	readFile.FileName = filePath
-	readFile.FilePath = filePath
+	readFile.FileName = dirSclice[len(dirSclice) - 1]
+	dirSclice = dirSclice[:len(dirSclice)-1]
+	readFile.FilePath = strings.Join(dirSclice, "/")
 	readFile, err := models.SFTPFileRead(readFile, sftpConn)
 	if err != nil {
 		beego.Error(err)
