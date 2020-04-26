@@ -1,0 +1,77 @@
+[{
+  "OperationID": 3,
+  "OperationDescription": "renew the itsmatruststore.jks file",
+  "OperationShortName": "truststore_renew",
+  "NumOfSteps": 5,
+  "DetailedSteps": [{
+    "SubOperationID": 1,
+    "SubOperationDescription": "delete the old truststore",
+    "Machine": "nfs-server",
+    "StepType": "SSH",
+    "Commands": "cp  /var/vols/itom/itsma/itsma-itsma-global/logs/certificate/ca-trust/itsma-truststore.jks  /tmp",
+    "File": "",
+    "FileChange": "",
+    "URL": "",
+    "Image": "",
+    "Notifications": "delete the old truststore.jks file",
+    "CheckMethod": "",
+    "CheckResults": true
+  },
+    {
+      "SubOperationID": 2,
+      "SubOperationDescription": "restart certificate deployment",
+      "Machine": "master",
+      "StepType": "SSH",
+      "Commands": "export ns=`kubectl get ns|grep itsma|cut -d ' ' -f1`&export pod=`kubectl get pods -n $ns|grep certificate|cut -d ' ' -f1`&kubectl describe po $pod -n $ns",
+      "File": "",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "restart the certificate pod to renew the truststore file",
+      "CheckMethod": "",
+      "CheckResults": true
+    },
+    {
+      "SubOperationID": 3,
+      "SubOperationDescription": "check certificate pod",
+      "Machine": "master",
+      "StepType": "SSH",
+      "Commands": "export ns=`kubectl get ns|grep itsma|cut -d ' ' -f1`;kubectl get pod -n $ns|grep certificate",
+      "File": "",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "check all certificate pods can be restarted",
+      "CheckMethod": "",
+      "CheckResults": true
+    },
+    {
+      "SubOperationID": 4,
+      "SubOperationDescription": "change idm certificate ownership",
+      "Machine": "nfs-server",
+      "StepType": "SSH",
+      "Commands": "chown 1999:1999 /var/vols/itom/itsma/itsma-itsma-global/logs/certificate/imported/*",
+      "File": "",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "please change the idm certificate ownership to itsma",
+      "CheckMethod": "",
+      "CheckResults": true
+    },
+    {
+      "SubOperationID": 5,
+      "SubOperationDescription": "consume idm certificate",
+      "Machine": "nfs-server",
+      "StepType": "SSH",
+      "Commands": "cp /var/vols/itom/itsma/itsma-itsma-global/logs/certificate/imported/* /var/vols/itom/itsma/itsma-itsma-global/logs/certificate/source",
+      "File": "",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "consume idm certificate to truststore.jks file",
+      "CheckMethod": "",
+      "CheckResults": true
+    }
+  ]
+}]

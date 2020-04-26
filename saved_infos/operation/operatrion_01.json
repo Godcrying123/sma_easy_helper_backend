@@ -1,0 +1,63 @@
+[{
+  "OperationID": 2,
+  "OperationDescription": "fix the rabbitMQ unstable issue when pods are not up",
+  "OperationShortName": "rabbitMQ_fix",
+  "NumOfSteps": 4,
+  "DetailedSteps": [{
+    "SubOperationID": 1,
+    "SubOperationDescription": "check rabbitMQ pods status",
+    "Machine": "master",
+    "StepType": "SSH",
+    "Commands": "kubectl get pods -n `kubectl get ns|grep itsma|cut -d ' ' -f1`|grep rabbit",
+    "File": "",
+    "FileChange": "",
+    "URL": "",
+    "Image": "",
+    "Notifications": "please check all rabbitMQ pods are in 2/2 status",
+    "CheckMethod": "rpm -qa|nginx",
+    "CheckResults": true
+  },
+    {
+      "SubOperationID": 2,
+      "SubOperationDescription": "stop all rabbitMQ pods",
+      "Machine": "master",
+      "StepType": "SSH",
+      "Commands": "kubectl scale statefulset infra-rabbitmq -n `kubectl get ns|grep itsma|cut -d ' ' -f1` --replicas=0",
+      "File": "",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "Scale Down rabbitMQ pods to 0 and wait it to be terminated",
+      "CheckMethod": "",
+      "CheckResults": true
+    },
+    {
+      "SubOperationID": 3,
+      "SubOperationDescription": "delete mnesia in NFS-Server",
+      "Machine": "nfs-server",
+      "StepType": "SSH",
+      "Commands": "cd /var/vols/itom/itsma/rabbitmq-infra-rabbitmq-0/data/xservices/rabbitmq/*.*.*.*/mnesia",
+      "File": "",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "Please delete all mnesia folder in NFS-Server",
+      "CheckMethod": "",
+      "CheckResults": true
+    },
+    {
+      "SubOperationID": 4,
+      "SubOperationDescription": "start all rabbitMQ pods",
+      "Machine": "master",
+      "StepType": "SSH",
+      "Commands": "kubectl scale statefulset infra-rabbitmq -n `kubectl get ns|grep itsma|cut -d ' ' -f1` --replicas=1",
+      "File": "",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "Please start all rabbitMQ pods",
+      "CheckMethod": "",
+      "CheckResults": true
+    }
+  ]
+}]

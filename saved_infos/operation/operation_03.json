@@ -1,0 +1,63 @@
+[{
+  "OperationID": 3,
+  "OperationDescription": "do full reindex for smartA pods on premise",
+  "OperationShortName": "full_reindex",
+  "NumOfSteps": 4,
+  "DetailedSteps": [{
+    "SubOperationID": 1,
+    "SubOperationDescription": "download the reindex script",
+    "Machine": "master",
+    "StepType": "URL",
+    "Commands": "",
+    "File": "",
+    "FileChange": "",
+    "URL": "https://marketplace.microfocus.com/itom/content/service-management-automation-operation-toolkit",
+    "Image": "",
+    "Notifications": "please download reindex script and copy it to /tmp folder in master node",
+    "CheckMethod": "",
+    "CheckResults": true
+  },
+    {
+      "SubOperationID": 2,
+      "SubOperationDescription": "check python version",
+      "Machine": "master",
+      "StepType": "SSH",
+      "Commands": "python --version",
+      "File": "",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "please check the machine has installed the python 2.7 version",
+      "CheckMethod": "",
+      "CheckResults": true
+    },
+    {
+      "SubOperationID": 3,
+      "SubOperationDescription": "run python script",
+      "Machine": "master",
+      "StepType": "SSH",
+      "Commands": "cd /tmp/SMA_operation_toolkit/contents/SMAX_search_reindex/ & python action_reindex.py -t <tenant_id>",
+      "File": "",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "please run python script and waiting its output",
+      "CheckMethod": "",
+      "CheckResults": true
+    },
+    {
+      "SubOperationID": 4,
+      "SubOperationDescription": "check reindex logs",
+      "Machine": "nfs-server",
+      "StepType": "File",
+      "Commands": "",
+      "File": "/var/vols/itom/itsma/global-volume/logs/xservices/platform/itom-xruntime-platform-offline-5d6677cfb9-rgqxl-2020-04-20/maas/maas_reindex.log",
+      "FileChange": "",
+      "URL": "",
+      "Image": "",
+      "Notifications": "please check reindex logs verifying this script is running well",
+      "CheckMethod": "",
+      "CheckResults": true
+    }
+  ]
+}]

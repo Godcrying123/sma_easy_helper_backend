@@ -1,0 +1,38 @@
+[
+  {
+    "ClusterID": 1,
+    "Name": "cluster-02",
+    "NumOfMachines": 2,
+    "ClusterLabel": "developer",
+    "Machines": [{
+      "MachineID": 1,
+      "HostName": "shc-sma-cpe10.hpeswlab.net",
+      "HostIp": "16.155.194.230",
+      "UserName": "root",
+      "AuthType": "password",
+      "PassWord": "iso*help1",
+      "AuthKey": "/test/script.crt",
+      "Label": "master"
+    },
+      {
+        "MachineID": 2,
+        "HostName": "shc-sma-cpe8.hpeswlab.net",
+        "HostIp": "16.155.196.99",
+        "UserName": "root",
+        "AuthType": "password",
+        "PassWord": "iso*help1",
+        "AuthKey": "/test/script.crt",
+        "Label": "worker"
+      },
+      {
+        "MachineID": 3,
+        "HostName": "shc-sma-cpe8.hpeswlab.net",
+        "HostIp": "16.155.196.99",
+        "UserName": "root",
+        "AuthType": "password",
+        "PassWord": "iso*help1",
+        "AuthKey": "/test/script.crt",
+        "Label": "nfs-server"
+      }
+    ]
+  }]
