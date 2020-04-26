@@ -14,6 +14,9 @@ import (
 )
 
 func init() {
+	// Register this router for the SSH connection
+	beego.Router("/", &controllers.SetupController{})
+	beego.Router("/api/v1/ws", &controllers.SSHWebSocketController{})
 	ns := beego.NewNamespace("/api/v1",
 		beego.NSNamespace("/clusters",
 			beego.NSInclude(
@@ -42,6 +45,4 @@ func init() {
 		//),
 	)
 	beego.AddNamespace(ns)
-	// Register this router for the SSH connection
-	beego.Router("/api/v1/ws", &controllers.SSHWebSocketController{})
 }
