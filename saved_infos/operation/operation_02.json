@@ -22,7 +22,7 @@
       "SubOperationDescription": "restart certificate deployment",
       "Machine": "master",
       "StepType": "SSH",
-      "Commands": "export ns=`kubectl get ns|grep itsma|cut -d ' ' -f1`&export pod=`kubectl get pods -n $ns|grep certificate|cut -d ' ' -f1`&kubectl describe po $pod -n $ns",
+      "Commands": "export ns=`kubectl get ns|grep itsma|cut -d ' ' -f1`;export pod=`kubectl get pods -n $ns|grep certificate|cut -d ' ' -f1`;kubectl describe po $pod -n $ns",
       "File": "",
       "FileChange": "",
       "URL": "",
