@@ -149,7 +149,6 @@ func (c *BaseController) SSHInit() {
 
 	machineSelect := string(c.Ctx.Input.RequestBody)
 	SSHHost = MachineMap[machineSelect]
-	beego.Info(SSHHost)
 	c.Data["json"] = SSHHost
 	c.ServeJSON()
 }

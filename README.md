@@ -22,3 +22,15 @@
 **4.Customer can click the previous used tab for switching the tab**
 >
 **5.Customer can go to log tab to get your operation step**
+### Package Environment Deploy ###
+**1. Directly download the compiled package based on your target system (for example Linux).**
+>
+You can go to the release tab of this github and download the tar file based on your used environment. For example, you should download the
+windows version if you want to deploy this in your environment.
+> 
+**2. use go build command to build the package and run it.**
+>
+If you would like to see the features of every functions and its data flow. please make sure the environment has installed
+the golang 1.14 environment. and you can directly run go build main.go in the root directory. the go mod will directly download
+the required package.
+>
